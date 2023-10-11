@@ -59,12 +59,19 @@ class Session:
         else:
             port = request.client[1]
 
-        session_id = hashlib.sha256(
-            (b'%s:%d:%d:%s' % (request.ip,
-                               port,
-                               os.getpid(),
-                               os.urandom(32)))[-63:]).hexdigest()
-        return session_id
+        for i in range(2):
+            session_id = hashlib.sha256(
+                (b'%s:%d:%d:%f:%d:%s' % (request.ip,
+                                         port,
+                                         os.getpid(),
+                                         time.time(),
+                                         i,
+                                         os.urandom(16)))[-63:]).hexdigest()
+
+            if not os.path.exists(os.path.join(self.path, session_id)):
+                return session_id
+
+        raise FileExistsError('session id collision')
 
     def _set_cookie(self, response, session_id):
         response.set_cookie(
