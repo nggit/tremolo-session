@@ -105,11 +105,14 @@ class Session:
         session_filepath = os.path.join(self.path, session_id)
 
         if os.path.exists(session_filepath):
-            with open(session_filepath, 'r') as fp:
-                try:
-                    session = json.loads(fp.read())
-                except ValueError:
-                    os.unlink(session_filepath)
+            fp = open(session_filepath, 'r')
+
+            try:
+                session = json.loads(fp.read())
+                fp.close()
+            except ValueError:
+                fp.close()
+                os.unlink(session_filepath)
 
         if not os.path.exists(session_filepath):
             session_id = self._regenerate_id(request, response)
