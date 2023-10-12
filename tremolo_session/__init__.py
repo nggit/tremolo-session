@@ -118,23 +118,27 @@ class Session:
             session_id = self._regenerate_id(request, response)
             session_filepath = os.path.join(self.path, session_id)
 
-        request.context.session = SessionData(session_id,
+        request.context.session = SessionData(self.name,
+                                              session_id,
                                               session,
-                                              session_filepath)
+                                              session_filepath,
+                                              request)
 
         # always renew/update session and cookie expiration time
         self._set_cookie(response, session_id)
 
-    async def _response_handler(self, context=None, response=None, **_):
+    async def _response_handler(self, context=None, **_):
         if context.session is not None:
             context.session.save()
 
 
 class SessionData(dict):
-    def __init__(self, session_id, session, filepath):
+    def __init__(self, name, session_id, session, filepath, request):
+        self.name = name
         self.id = session_id
         self.session = session
         self.filepath = filepath
+        self.request = request
 
         super().__init__()
         self.update(session)

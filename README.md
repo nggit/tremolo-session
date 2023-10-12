@@ -1,6 +1,8 @@
 # tremolo-session
 A simple, file-based session middleware for [Tremolo](https://github.com/nggit/tremolo).
 
+See also: [tremolo-login](https://github.com/nggit/tremolo-login).
+
 ## Usage
 ```python
 #!/usr/bin/env python3
