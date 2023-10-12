@@ -13,8 +13,7 @@ with open('README.md', 'r') as f:
 
 setup(
     name='tremolo-session',
-    packages=['tremolo_session'],
-    version='1.0.1',
+    version='1.0.2',
     license='MIT',
     author='nggit',
     author_email='contact@anggit.com',
@@ -22,6 +21,8 @@ setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/nggit/tremolo-session',
+    packages=['tremolo_session'],
+    install_requires=['tremolo'],
     classifiers=[
         'Development Status :: 4 - Beta',
         'License :: OSI Approved :: MIT License',
