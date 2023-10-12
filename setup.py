@@ -14,7 +14,7 @@ with open('README.md', 'r') as f:
 setup(
     name='tremolo-session',
     packages=['tremolo_session'],
-    version='1.0.0',
+    version='1.0.1',
     license='MIT',
     author='nggit',
     author_email='contact@anggit.com',
