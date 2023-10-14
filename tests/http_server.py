@@ -26,7 +26,7 @@ sess = Session(app)
 session_filepath = os.path.join(sess.path, '5e55')
 
 
-@app.on_start
+@app.on_worker_start
 async def worker_start(**_):
     # create file /tmp/tremolo-sess/5e55
     with open(session_filepath, 'w') as fp:
