@@ -1,5 +1,6 @@
 # Copyright (c) 2023 nggit
 
+__version__ = '1.0.3'
 __all__ = ('Session', 'SessionData')
 
 import hashlib  # noqa: E402
@@ -34,8 +35,8 @@ class Session:
 
         self.cookie_params = cookie_params
 
-        app.middlewares['request'].append((self._request_handler, {}))
-        app.middlewares['response'].append((self._response_handler, {}))
+        app.add_middleware(self._request_handler, 'request')
+        app.add_middleware(self._response_handler, 'response')
 
     def _get_path(self, path):
         if os.path.exists(path):
