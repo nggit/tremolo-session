@@ -41,7 +41,7 @@ async def worker_start(**_):
 async def index(context=None, response=None, **_):
     if context.session is None:
         # there is no session because the client does not send 'sess' cookie
-        return b''.join(response.header)
+        return b'\r\n'.join(b'\r\n'.join(v) for v in response.headers.values())
 
     # set session
     context.session['baz'] = 'qux'

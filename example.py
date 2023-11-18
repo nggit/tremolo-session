@@ -25,4 +25,4 @@ async def index(request=None, **server):
     return b'You have visited this page %d times today.' % session['visits']
 
 if __name__ == '__main__':
-    app.run('0.0.0.0', 8000, debug=True)
+    app.run('0.0.0.0', 8000, debug=True, reload=True)
