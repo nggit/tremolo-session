@@ -43,14 +43,14 @@ class TestHTTPClient(unittest.TestCase):
         self.assertEqual(header[:header.find(b'\r\n')],
                          b'HTTP/1.0 200 OK')
 
-        self.assertTrue(b'\r\nSet-Cookie: sess=id%3D' in body)
+        self.assertTrue(b'\r\nSet-Cookie: sess=' in body)
 
     def test_get_ok(self):
         header, body = getcontents(
             host=HTTP_HOST,
             port=HTTP_PORT,
             raw=b'GET / HTTP/1.0\r\nHost: localhost\r\n'
-                b'Cookie: sess=id%3D5e55%26expires%3D' + (b'%d' % _EXPIRES) +
+                b'Cookie: sess=5e55.' + (b'%d' % _EXPIRES) +
                 b'\r\n\r\n'
         )
 
@@ -64,7 +64,7 @@ class TestHTTPClient(unittest.TestCase):
             host=HTTP_HOST,
             port=HTTP_PORT,
             raw=b'GET / HTTP/1.0\r\nHost: localhost\r\nCookie: '
-                b'sess=id%3D5e55bad%26expires%3D' + (b'%d' % _EXPIRES) +
+                b'sess=5e55bad.' + (b'%d' % _EXPIRES) +
                 b'\r\n\r\n'
         )
 
@@ -78,7 +78,7 @@ class TestHTTPClient(unittest.TestCase):
             host=HTTP_HOST,
             port=HTTP_PORT,
             raw=b'GET / HTTP/1.0\r\nHost: localhost\r\n'
-                b'Cookie: sess=id%3Da%26expires%3D0\r\n\r\n'
+                b'Cookie: sess=a.0\r\n\r\n'
         )
 
         self.assertEqual(header[:header.find(b'\r\n')],
@@ -97,7 +97,7 @@ class TestHTTPClient(unittest.TestCase):
                          b'HTTP/1.1 404 Not Found')
 
         # generally, cookies must also be present on the 404 page
-        self.assertTrue(b'\r\nSet-Cookie: sess=id%3D' in header)
+        self.assertTrue(b'\r\nSet-Cookie: sess=' in header)
 
     def test_get_badcookie_keyerror(self):
         header, body = getcontents(
@@ -117,7 +117,7 @@ class TestHTTPClient(unittest.TestCase):
             host=HTTP_HOST,
             port=HTTP_PORT,
             raw=b'GET / HTTP/1.1\r\nHost: localhost\r\n'
-                b'Cookie: sess=id%3Dx%26expires%3D0\r\n\r\n'
+                b'Cookie: sess=x.0\r\n\r\n'
         )
 
         self.assertEqual(header[:header.find(b'\r\n')],

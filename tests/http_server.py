@@ -55,7 +55,7 @@ async def my_response_middleware(request=None, response=None, **_):
     if session is not None:
         assert session['baz'] == 'qux'
 
-        if 'id=5e55&expires=' in request.cookies['sess'][0]:
+        if '5e55.' in request.cookies['sess'][0]:
             assert session['foo'] == 'bar'
             assert os.path.basename(session.filepath) == '5e55'
 
@@ -64,7 +64,7 @@ async def my_response_middleware(request=None, response=None, **_):
             session.destroy()
 
             assert os.path.exists(session.filepath) is False
-        elif 'id=5e55bad&expires=' in request.cookies['sess'][0]:
+        elif '5e55bad.' in request.cookies['sess'][0]:
             assert os.path.basename(session.filepath) != '5e55bad'
 
 if __name__ == '__main__':

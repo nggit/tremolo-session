@@ -1,6 +1,6 @@
 # Copyright (c) 2023 nggit
 
-__version__ = '1.0.3'
+__version__ = '1.0.4'
 __all__ = ('Session', 'SessionData')
 
 import hashlib  # noqa: E402
@@ -8,8 +8,6 @@ import json  # noqa: E402
 import os  # noqa: E402
 import tempfile  # noqa: E402
 import time  # noqa: E402
-
-from urllib.parse import parse_qs  # noqa: E402
 
 from tremolo.exceptions import Forbidden  # noqa: E402
 
@@ -21,7 +19,7 @@ class Session:
 
         :param app: The Tremolo app object
         :param name: Session name. Will be used in the response header. E.g.
-            ``Set-Cookie: sess=id%3D0123456789abcdef%26expires%3D1234567890;``
+            ``Set-Cookie: sess=0123456789abcdef.1234567890;``
         :param path: A session directory path where the session files will be
             stored. E.g. ``/path/to/dir``. If it doesn't exist, it will be
             created under the Operating System temporary directory.
@@ -77,7 +75,7 @@ class Session:
     def _set_cookie(self, response, session_id):
         response.set_cookie(
             self.name,
-            'id=%s&expires=%d' % (session_id, int(time.time() + self.expires)),
+            '%s.%d' % (session_id, int(time.time() + self.expires)),
             **self.cookie_params
         )
 
@@ -89,12 +87,11 @@ class Session:
             return
 
         try:
-            sess = parse_qs(request.cookies[self.name][0])
-            session_id = sess['id'][0]
+            session_id, expires = request.cookies[self.name][0].split('.', 1)
 
             int(session_id, 16)
 
-            if time.time() > int(sess['expires'][0]):
+            if time.time() > int(expires):
                 try:
                     os.unlink(os.path.join(self.path, session_id))
                 except FileNotFoundError:
