@@ -26,7 +26,8 @@ class Session:
         :param paths: A list of url path prefixes
             where the ``Set-Cookie`` header will appear.
             This is for fine-grained security and performance.
-            ['/'] will match '/any', ['/users'] will match '/users/login', etc.
+            ``['/']`` will match ``/any``,
+            ``['/users']`` will match ``/users/login``, etc.
         """
         self.name = name
         self.path = self._get_path(path)
