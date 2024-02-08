@@ -21,7 +21,7 @@ HTTP_PORT = 28000
 app = Tremolo()
 
 # session middleware
-sess = Session(app)
+sess = Session(app, paths=['/cookies', '/invalid'])
 
 session_filepath = os.path.join(sess.path, '5e55')
 
@@ -37,7 +37,7 @@ async def worker_start(**_):
         fp.write('{badfile}')
 
 
-@app.route('/')
+@app.route('/cookies')
 async def index(context=None, response=None, **_):
     if context.session is None:
         # there is no session because the client does not send 'sess' cookie
