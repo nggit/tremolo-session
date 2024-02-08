@@ -13,7 +13,7 @@ from tremolo.exceptions import Forbidden  # noqa: E402
 
 
 class Session:
-    def __init__(self, app, name='sess', path='sess',
+    def __init__(self, app, name='sess', path='sess', paths=[],
                  expires=1800, cookie_params={}):
         """A simple, file-based session middleware for Tremolo.
 
@@ -23,9 +23,16 @@ class Session:
         :param path: A session directory path where the session files will be
             stored. E.g. ``/path/to/dir``. If it doesn't exist, it will be
             created under the Operating System temporary directory.
+        :param paths: A list of url path prefixes
+            where the ``Set-Cookie`` header will appear.
+            This is for fine-grained security and performance.
+            ['/'] will match '/any', ['/users'] will match '/users/login', etc.
         """
         self.name = name
         self.path = self._get_path(path)
+        self.paths = [
+            (v.rstrip('/') + '/').encode('latin-1') for v in paths
+        ]
         self.expires = min(expires, 31968000)
 
         # overwrite to maximum cookie validity (400 days)
@@ -80,6 +87,17 @@ class Session:
         )
 
     async def _request_handler(self, request=None, response=None, **_):
+        if self.paths:
+            for path in self.paths:
+                if (request.path + b'/').startswith(path):
+                    break
+            else:
+                request.context.session = None
+                return
+
+        response.set_header(b'Cache-Control', b'no-cache, must-revalidate')
+        response.set_header(b'Expires', b'Thu, 01 Jan 1970 00:00:00 GMT')
+
         if self.name not in request.cookies:
             self._set_cookie(response, self._regenerate_id(request, response))
 
@@ -88,7 +106,6 @@ class Session:
 
         try:
             session_id, expires = request.cookies[self.name][0].split('.', 1)
-
             int(session_id, 16)
 
             if time.time() > int(expires):

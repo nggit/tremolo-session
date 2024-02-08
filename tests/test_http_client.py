@@ -33,7 +33,7 @@ class TestHTTPClient(unittest.TestCase):
         print('\r\033[2K{0:d}. {1:s}'.format(sys.modules['__main__'].tests_run,
                                              self.id()))
 
-    def test_get_header(self):
+    def test_get_nosetcookie(self):
         header, body = getcontents(host=HTTP_HOST,
                                    port=HTTP_PORT,
                                    method='GET',
@@ -41,15 +41,29 @@ class TestHTTPClient(unittest.TestCase):
                                    version='1.0')
 
         self.assertEqual(header[:header.find(b'\r\n')],
+                         b'HTTP/1.0 503 Service Unavailable')
+
+        self.assertFalse(b'\r\nCache-Control: no-cache,' in header)
+        self.assertFalse(b'\r\nSet-Cookie: sess=' in header)
+
+    def test_get_header(self):
+        header, body = getcontents(host=HTTP_HOST,
+                                   port=HTTP_PORT,
+                                   method='GET',
+                                   url='/cookies',
+                                   version='1.0')
+
+        self.assertEqual(header[:header.find(b'\r\n')],
                          b'HTTP/1.0 200 OK')
 
+        self.assertTrue(b'\r\nCache-Control: no-cache,' in body)
         self.assertTrue(b'\r\nSet-Cookie: sess=' in body)
 
     def test_get_ok(self):
         header, body = getcontents(
             host=HTTP_HOST,
             port=HTTP_PORT,
-            raw=b'GET / HTTP/1.0\r\nHost: localhost\r\n'
+            raw=b'GET /cookies HTTP/1.0\r\nHost: localhost\r\n'
                 b'Cookie: sess=5e55.' + (b'%d' % _EXPIRES) +
                 b'\r\n\r\n'
         )
@@ -63,7 +77,7 @@ class TestHTTPClient(unittest.TestCase):
         header, body = getcontents(
             host=HTTP_HOST,
             port=HTTP_PORT,
-            raw=b'GET / HTTP/1.0\r\nHost: localhost\r\nCookie: '
+            raw=b'GET /cookies HTTP/1.0\r\nHost: localhost\r\nCookie: '
                 b'sess=5e55bad.' + (b'%d' % _EXPIRES) +
                 b'\r\n\r\n'
         )
@@ -77,7 +91,7 @@ class TestHTTPClient(unittest.TestCase):
         header, body = getcontents(
             host=HTTP_HOST,
             port=HTTP_PORT,
-            raw=b'GET / HTTP/1.0\r\nHost: localhost\r\n'
+            raw=b'GET /cookies HTTP/1.0\r\nHost: localhost\r\n'
                 b'Cookie: sess=a.0\r\n\r\n'
         )
 
@@ -96,14 +110,14 @@ class TestHTTPClient(unittest.TestCase):
         self.assertEqual(header[:header.find(b'\r\n')],
                          b'HTTP/1.1 404 Not Found')
 
-        # generally, cookies must also be present on the 404 page
+        # cookies may also be present on the 404 page
         self.assertTrue(b'\r\nSet-Cookie: sess=' in header)
 
     def test_get_badcookie_keyerror(self):
         header, body = getcontents(
             host=HTTP_HOST,
             port=HTTP_PORT,
-            raw=b'GET / HTTP/1.1\r\nHost: localhost\r\n'
+            raw=b'GET /cookies HTTP/1.1\r\nHost: localhost\r\n'
                 b'Cookie: sess=xx\r\n\r\n'
         )
 
@@ -116,7 +130,7 @@ class TestHTTPClient(unittest.TestCase):
         header, body = getcontents(
             host=HTTP_HOST,
             port=HTTP_PORT,
-            raw=b'GET / HTTP/1.1\r\nHost: localhost\r\n'
+            raw=b'GET /cookies HTTP/1.1\r\nHost: localhost\r\n'
                 b'Cookie: sess=x.0\r\n\r\n'
         )
 
