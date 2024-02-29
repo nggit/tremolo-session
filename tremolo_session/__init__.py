@@ -24,7 +24,7 @@ class Session:
             stored. E.g. ``/path/to/dir``. If it doesn't exist, it will be
             created under the Operating System temporary directory.
         :param paths: A list of url path prefixes
-            where the ``Set-Cookie`` header will appear.
+            where the ``Set-Cookie`` header should appear.
             This is for fine-grained security and performance.
             ``['/']`` will match ``/any``,
             ``['/users']`` will match ``/users/login``, etc.
