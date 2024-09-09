@@ -1,0 +1,3 @@
+graft tremolo_session
+prune tests
+global-exclude *.py[cod] __pycache__

@@ -2,12 +2,17 @@
 
 import multiprocessing as mp
 import os
+import sys
 import signal
 import unittest
 
-from tests.http_server import app, HTTP_HOST, HTTP_PORT
+# makes imports relative from the repo directory
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-if __name__ == '__main__':
+from tests.http_server import app, HTTP_HOST, HTTP_PORT  # noqa: E402
+
+
+def main():
     mp.set_start_method('spawn')
 
     p = mp.Process(
@@ -21,5 +26,9 @@ if __name__ == '__main__':
         unittest.TextTestRunner().run(suite)
     finally:
         if p.is_alive():
-            os.kill(p.pid, signal.SIGINT)
+            os.kill(p.pid, signal.SIGTERM)
             p.join()
+
+
+if __name__ == '__main__':
+    main()
