@@ -1,6 +1,6 @@
 # Copyright (c) 2023 nggit
 
-__version__ = '1.0.5'
+__version__ = '1.0.6'
 __all__ = ('Session', 'SessionData')
 
 import hashlib  # noqa: E402
@@ -41,17 +41,18 @@ class Session:
 
         self.cookie_params = cookie_params
 
-        app.add_middleware(self._request_handler, 'request')
-        app.add_middleware(self._response_handler, 'response')
+        app.add_middleware(self._on_request, 'request')
+        app.add_middleware(self._on_response, 'response')
 
     def _get_path(self, path):
-        if os.path.exists(path):
+        if os.path.isdir(path):
             return path
 
         tmp = tempfile.mkdtemp()
         os.rmdir(tmp)
-        _tmp = os.path.join(os.path.dirname(tmp),
-                            'tremolo-%s' % os.path.basename(path))
+        _tmp = os.path.join(
+            os.path.dirname(tmp), 'tremolo-%s' % os.path.basename(path)
+        )
 
         try:
             os.mkdir(_tmp)
@@ -87,13 +88,13 @@ class Session:
             **self.cookie_params
         )
 
-    async def _request_handler(self, request=None, response=None, **_):
+    async def _on_request(self, request=None, response=None, **_):
         if self.paths:
             for path in self.paths:
                 if (request.path + b'/').startswith(path):
                     break
             else:
-                request.context.session = None
+                request.ctx.session = None
                 return
 
         response.set_header(b'Cache-Control', b'no-cache, must-revalidate')
@@ -102,7 +103,7 @@ class Session:
         if self.name not in request.cookies:
             self._set_cookie(response, self._regenerate_id(request, response))
 
-            request.context.session = None
+            request.ctx.session = None
             return
 
         try:
@@ -120,7 +121,7 @@ class Session:
         session = {}
         session_filepath = os.path.join(self.path, session_id)
 
-        if os.path.exists(session_filepath):
+        if os.path.isfile(session_filepath):
             fp = open(session_filepath, 'r')
 
             try:
@@ -130,22 +131,22 @@ class Session:
                 fp.close()
                 os.unlink(session_filepath)
 
-        if not os.path.exists(session_filepath):
+        if not os.path.isfile(session_filepath):
             session_id = self._regenerate_id(request, response)
             session_filepath = os.path.join(self.path, session_id)
 
-        request.context.session = SessionData(self.name,
-                                              session_id,
-                                              session,
-                                              session_filepath,
-                                              request)
+        request.ctx.session = SessionData(self.name,
+                                          session_id,
+                                          session,
+                                          session_filepath,
+                                          request)
 
         # always renew/update session and cookie expiration time
         self._set_cookie(response, session_id)
 
-    async def _response_handler(self, context=None, **_):
-        if context.session is not None:
-            context.session.save()
+    async def _on_response(self, request=None, **_):
+        if request.ctx.session is not None:
+            request.ctx.session.save()
 
 
 class SessionData(dict):
