@@ -1,4 +1,7 @@
 # tremolo-session
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=nggit_tremolo-session&metric=coverage)](https://sonarcloud.io/summary/new_code?id=nggit_tremolo-session)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=nggit_tremolo-session&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=nggit_tremolo-session)
+
 A simple, file-based session middleware for [Tremolo](https://github.com/nggit/tremolo).
 
 See also: [tremolo-login](https://github.com/nggit/tremolo-login).
