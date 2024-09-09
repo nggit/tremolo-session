@@ -1,0 +1,32 @@
+[build-system]
+requires = [ 'setuptools>=61.0', 'wheel' ]
+build-backend = 'setuptools.build_meta'
+
+[project]
+name = 'tremolo-session'
+authors = [
+    { name = 'nggit', email = 'contact@anggit.com' },
+]
+description = 'A simple, file-based session middleware for Tremolo.'
+requires-python = '>=3.6'
+dependencies = [
+    'tremolo',
+]
+license = { text = 'MIT License' }
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: MIT License',
+    'Operating System :: OS Independent',
+    'Topic :: Software Development :: Libraries :: Application Frameworks',
+]
+dynamic = [ 'version', 'readme' ]
+
+[project.urls]
+Homepage = 'https://github.com/nggit/tremolo-session'
+Source = 'https://github.com/nggit/tremolo-session'
+Funding = 'https://github.com/sponsors/nggit'
+
+[tool.setuptools.dynamic]
+version = { attr = 'tremolo_session.__version__' }
+readme = { file = 'README.md', content-type = 'text/markdown' }
