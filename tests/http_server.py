@@ -46,8 +46,8 @@ async def index(context=None, response=None, **_):
 
 
 @app.on_response
-async def my_response_middleware(request=None, response=None, **_):
-    session = request.context.session
+async def response_middleware(request=None, response=None, **_):
+    session = request.ctx.session
 
     if session is not None:
         assert session['baz'] == 'qux'
