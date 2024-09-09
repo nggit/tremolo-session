@@ -1,7 +1,24 @@
-__all__ = ('getcontents',)
+__all__ = ('read_header', 'getcontents')
 
 import socket  # noqa: E402
 import time  # noqa: E402
+
+
+def read_header(header, key):
+    name = b'\r\n%s: ' % key
+    headers = []
+    start = 0
+
+    while True:
+        start = header.find(name, start)
+
+        if start == -1:
+            break
+
+        start += len(name)
+        headers.append(header[start:header.find(b'\r\n', start)])
+
+    return headers or [b'']
 
 
 # a simple HTTP client for tests
@@ -62,7 +79,12 @@ def getcontents(host, port, method='GET', url='/', version='1.1', headers=None,
                     response_data.endswith(b'\r\n0\r\n\r\n')):
                 break
 
-            buf = sock.recv(4096)
+            try:
+                buf = sock.recv(4096)
+            except ConnectionResetError:
+                print('getcontents: retry:', request_header)
+                return getcontents(host, port, raw=raw)
+
             response_data.extend(buf)
 
             if response_header:
@@ -81,11 +103,9 @@ def getcontents(host, port, method='GET', url='/', version='1.1', headers=None,
 
             _response_header = response_header.lower()
             _version = version.encode('latin-1')
-            cl = _response_header.find(b'\r\ncontent-length:')
-
-            if cl != -1:
-                cl = int(_response_header[
-                    cl + 17:_response_header.find(b'\r\n', cl + 2)])
+            cl = int(
+                read_header(_response_header, b'content-length')[0] or -1
+            )
 
             if _response_header.startswith(b'http/%s 100 continue' % _version):
                 sock.sendall(request_body)

@@ -7,10 +7,7 @@ import os  # noqa: E402
 import sys  # noqa: E402
 
 # makes imports relative from the repo directory
-sys.path.insert(
-    0,
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-)
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from tremolo import Tremolo  # noqa: E402
 from tremolo_session import Session  # noqa: E402
@@ -66,6 +63,7 @@ async def my_response_middleware(request=None, response=None, **_):
             assert os.path.exists(session.filepath) is False
         elif '5e55bad.' in request.cookies['sess'][0]:
             assert os.path.basename(session.filepath) != '5e55bad'
+
 
 if __name__ == '__main__':
     app.run(HTTP_HOST, port=HTTP_PORT, debug=True)
