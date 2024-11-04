@@ -9,11 +9,11 @@ on:
 
 jobs:
   tests:
-    name: Python ${{ matrix.python-version }} on ${{ matrix.os }}
+    name: Python ${{ matrix.python_version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version:
+        python_version:
           - '3.13'
           - '3.12'
           - '3.11'
@@ -26,10 +26,11 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ matrix.python_version }}
 
       - name: Install dependencies
         run: |
@@ -43,18 +44,18 @@ jobs:
           python -m bandit --recursive tremolo_session/
           python -m pip install --upgrade flake8
           python -m flake8 .
-        if: ${{ matrix.os == 'ubuntu-20.04' && matrix.python-version == '3.12' }}
+        if: ${{ matrix.os == 'ubuntu-20.04' && matrix.python_version == '3.13' }}
 
       - name: Run tests
         run: python -m tests
-        if: ${{ matrix.python-version != '3.12' }}
+        if: ${{ matrix.python_version != '3.12' }}
 
       - name: Run tests with coverage
         run: |
           python -m coverage run -m tests
           python -m coverage combine
           mkdir artifact && mv .coverage artifact/.coverage.${{ matrix.os }}
-        if: ${{ matrix.python-version == '3.12' && !startsWith(matrix.os, 'windows-') }}
+        if: ${{ matrix.python_version == '3.13' && !startsWith(matrix.os, 'windows-') }}
 
       - name: Run tests with coverage on Windows
         run: |
@@ -62,19 +63,20 @@ jobs:
           python -m coverage combine
           mkdir artifact && move .coverage artifact\.coverage.windows
         shell: cmd
-        if: ${{ matrix.python-version == '3.12' && startsWith(matrix.os, 'windows-') }}
+        if: ${{ matrix.python_version == '3.13' && startsWith(matrix.os, 'windows-') }}
 
       - uses: actions/upload-artifact@v3
         with:
           path: artifact
           include-hidden-files: true
-        if: ${{ matrix.python-version == '3.12' }}
+        if: ${{ matrix.python_version == '3.13' }}
   report:
     name: Upload coverage to SonarCloud Scan
     needs: ['tests']
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Install dependencies
         run: |
           python -m venv --system-site-packages .local
@@ -84,6 +86,7 @@ jobs:
           python -m pip install --upgrade tremolo
 
       - uses: actions/download-artifact@v3
+
       - name: Combine and view report
         run: |
           python -m coverage combine artifact
