@@ -1,6 +1,6 @@
 # Copyright (c) 2023 nggit
 
-__version__ = '1.0.7'
+__version__ = '1.0.8'
 __all__ = ('Session', 'SessionData')
 
 import hashlib  # noqa: E402
@@ -13,7 +13,7 @@ from tremolo.exceptions import Forbidden  # noqa: E402
 
 
 class Session:
-    def __init__(self, app, name='sess', path='sess', paths=[],
+    def __init__(self, app, name='sess', path='sess', paths=(),
                  expires=1800, cookie_params={}):
         """A simple, file-based session middleware for Tremolo.
 
@@ -159,7 +159,7 @@ class SessionData(dict):
             with open(self.filepath, 'w') as fp:
                 json.dump(self, fp)
 
-    def destroy(self):
+    def delete(self):
         try:
             os.unlink(self.filepath)
         except FileNotFoundError:
