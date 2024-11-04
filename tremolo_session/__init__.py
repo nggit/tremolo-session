@@ -62,19 +62,8 @@ class Session:
         return _tmp
 
     def _regenerate_id(self, request, response):
-        if request.client is None:
-            port = request.socket.fileno()
-        else:
-            port = request.client[1]
-
         for i in range(2):
-            session_id = hashlib.sha256(
-                (b'%s:%d:%d:%f:%d:%s' % (request.ip,
-                                         port,
-                                         os.getpid(),
-                                         time.time(),
-                                         i,
-                                         os.urandom(16)))[-63:]).hexdigest()
+            session_id = hashlib.sha256(request.uid(32 + i)).hexdigest()
 
             if not os.path.exists(os.path.join(self.path, session_id)):
                 return session_id
@@ -88,7 +77,10 @@ class Session:
             **self.cookie_params
         )
 
-    async def _on_request(self, request=None, response=None, **_):
+    async def _on_request(self, **server):
+        request = server['request']
+        response = server['response']
+
         if self.paths:
             for path in self.paths:
                 if (request.path + b'/').startswith(path):
@@ -144,7 +136,9 @@ class Session:
         # always renew/update session and cookie expiration time
         self._set_cookie(response, session_id)
 
-    async def _on_response(self, request=None, **_):
+    async def _on_response(self, **server):
+        request = server['request']
+
         if request.ctx.session is not None:
             request.ctx.session.save()
 

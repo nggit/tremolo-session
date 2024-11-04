@@ -10,7 +10,7 @@ authors = [
 description = 'A simple, file-based session middleware for Tremolo.'
 requires-python = '>=3.6'
 dependencies = [
-    'tremolo',
+    'tremolo>=0.0.760',
 ]
 license = { text = 'MIT License' }
 classifiers = [

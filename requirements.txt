@@ -1,1 +1,1 @@
-tremolo
+tremolo>=0.0.760
