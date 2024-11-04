@@ -57,8 +57,8 @@ async def response_middleware(request=None, response=None, **_):
             assert os.path.basename(session.filepath) == '5e55'
 
             # test idempotence
-            session.destroy()
-            session.destroy()
+            session.delete()
+            session.delete()
 
             assert os.path.exists(session.filepath) is False
         elif '5e55bad.' in request.cookies['sess'][0]:
