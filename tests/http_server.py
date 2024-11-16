@@ -35,13 +35,13 @@ async def worker_start(**_):
 
 
 @app.route('/cookies')
-async def index(context, response, **_):
-    if context.session is None:
+async def index(request, response, **_):
+    if request.ctx.session is None:
         # there is no session because the client does not send 'sess' cookie
         return b'\r\n'.join(b'\r\n'.join(v) for v in response.headers.values())
 
     # set session
-    context.session['baz'] = 'qux'
+    request.ctx.session['baz'] = 'qux'
     return b'OK'
 
 
