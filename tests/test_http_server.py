@@ -20,7 +20,7 @@ from tests.utils import getcontents  # noqa: E402
 _EXPIRES = time.time() + 1800
 
 
-class TestHTTPClient(unittest.TestCase):
+class TestHTTPServer(unittest.TestCase):
     def setUp(self):
         print('\r\n[', self.id(), ']')
 
