@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-from tremolo import Tremolo
+from tremolo import Application
 from tremolo_session import Session
 
-app = Tremolo()
+app = Application()
 
 # this is a session middleware
 # that enables you to use context.session or request.ctx.session
@@ -11,7 +11,7 @@ Session(app, expires=86400)
 
 
 @app.route('/')
-async def index(request=None, **server):
+async def index(request, **server):
     session = request.ctx.session
 
     if session is None:
