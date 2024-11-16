@@ -25,12 +25,11 @@ class Session:
             created under the Operating System temporary directory.
         :param paths: A list of url path prefixes
             where the ``Set-Cookie`` header should appear.
-            This is for fine-grained security and performance.
             ``['/']`` will match ``/any``,
             ``['/users']`` will match ``/users/login``, etc.
         """
         self.name = name
-        self.path = self._get_path(path)
+        self.path = self._get_path(path, app.__class__.__name__)
         self.paths = [
             (v.rstrip('/') + '/').encode('latin-1') for v in paths
         ]
@@ -44,22 +43,21 @@ class Session:
         app.add_middleware(self._on_request, 'request')
         app.add_middleware(self._on_response, 'response')
 
-    def _get_path(self, path):
+    def _get_path(self, path, prefix):
         if os.path.isdir(path):
             return path
 
         tmp = tempfile.mkdtemp()
         os.rmdir(tmp)
-        _tmp = os.path.join(
-            os.path.dirname(tmp), 'tremolo-%s' % os.path.basename(path)
+        tmp = os.path.join(
+            os.path.dirname(tmp), '%s-%s' % (prefix.lower(),
+                                             os.path.basename(path))
         )
 
-        try:
-            os.mkdir(_tmp)
-        except FileExistsError:
-            pass
+        if not os.path.exists(tmp):
+            os.mkdir(tmp)
 
-        return _tmp
+        return tmp
 
     def _regenerate_id(self, request, response):
         for i in range(2):
@@ -77,10 +75,7 @@ class Session:
             **self.cookie_params
         )
 
-    async def _on_request(self, **server):
-        request = server['request']
-        response = server['response']
-
+    async def _on_request(self, request, response, **_):
         if self.paths:
             for path in self.paths:
                 if (request.path + b'/').startswith(path):
@@ -101,17 +96,14 @@ class Session:
         try:
             session_id, expires = request.cookies[self.name][0].split('.', 1)
             int(session_id, 16)
+            session_filepath = os.path.join(self.path, session_id)
 
-            if time.time() > int(expires):
-                try:
-                    os.unlink(os.path.join(self.path, session_id))
-                except FileNotFoundError:
-                    pass
+            if time.time() > int(expires) and os.path.exists(session_filepath):
+                os.unlink(session_filepath)
         except (KeyError, ValueError) as exc:
             raise Forbidden('bad cookie') from exc
 
         session = {}
-        session_filepath = os.path.join(self.path, session_id)
 
         if os.path.isfile(session_filepath):
             fp = open(session_filepath, 'r')
@@ -136,9 +128,7 @@ class Session:
         # always renew/update session and cookie expiration time
         self._set_cookie(response, session_id)
 
-    async def _on_response(self, **server):
-        request = server['request']
-
+    async def _on_response(self, request, **_):
         if request.ctx.session is not None:
             request.ctx.session.save()
 
@@ -160,7 +150,5 @@ class SessionData(dict):
                 json.dump(self, fp)
 
     def delete(self):
-        try:
+        if os.path.exists(self.filepath):
             os.unlink(self.filepath)
-        except FileNotFoundError:
-            pass
