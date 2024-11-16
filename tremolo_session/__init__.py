@@ -1,6 +1,6 @@
 # Copyright (c) 2023 nggit
 
-__version__ = '1.0.9'
+__version__ = '1.0.10'
 __all__ = ('Session', 'SessionData')
 
 import hashlib  # noqa: E402
@@ -96,24 +96,27 @@ class Session:
         try:
             session_id, expires = request.cookies[self.name][0].split('.', 1)
             int(session_id, 16)
-            session_filepath = os.path.join(self.path, session_id)
 
-            if time.time() > int(expires) and os.path.exists(session_filepath):
-                os.unlink(session_filepath)
+            expires = int(expires)
         except (KeyError, ValueError) as exc:
+            self._set_cookie(response, self._regenerate_id(request, response))
             raise Forbidden('bad cookie') from exc
 
+        session_filepath = os.path.join(self.path, session_id)
         session = {}
 
         if os.path.isfile(session_filepath):
-            fp = open(session_filepath, 'r')
-
-            try:
-                session = json.loads(fp.read())
-                fp.close()
-            except ValueError:
-                fp.close()
+            if time.time() > expires:
                 os.unlink(session_filepath)
+            else:
+                fp = open(session_filepath, 'r')
+
+                try:
+                    session = json.loads(fp.read())
+                    fp.close()
+                except ValueError:
+                    fp.close()
+                    os.unlink(session_filepath)
 
         if not os.path.isfile(session_filepath):
             session_id = self._regenerate_id(request, response)
