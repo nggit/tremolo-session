@@ -16,7 +16,7 @@ from tremolo_session import Session
 app = Application()
 
 # this is a session middleware
-# that enables you to use context.session or request.ctx.session
+# that enables you to use request.ctx.session
 Session(app, expires=86400)
 
 
