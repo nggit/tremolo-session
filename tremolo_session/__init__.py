@@ -125,7 +125,8 @@ class Session:
         request.ctx.session = SessionData(self.name,
                                           session_id,
                                           session,
-                                          session_filepath)
+                                          session_filepath,
+                                          request)
 
         # always renew/update session and cookie expiration time
         self._set_cookie(response, session_id)
@@ -136,11 +137,12 @@ class Session:
 
 
 class SessionData(dict):
-    def __init__(self, name, session_id, session, filepath):
+    def __init__(self, name, session_id, session, filepath, request):
         self.name = name
         self.id = session_id
         self.session = session
         self.filepath = filepath
+        self.request = request
 
         self.update(session)
 
