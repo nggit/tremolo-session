@@ -1,15 +1,16 @@
-# Copyright (c) 2023 nggit
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2023 Anggit Arfanto
+
+import hashlib
+import json
+import os
+import tempfile
+import time
+
+from tremolo.exceptions import Forbidden
 
 __version__ = '1.0.11'
-__all__ = ('Session', 'SessionData')
-
-import hashlib  # noqa: E402
-import json  # noqa: E402
-import os  # noqa: E402
-import tempfile  # noqa: E402
-import time  # noqa: E402
-
-from tremolo.exceptions import Forbidden  # noqa: E402
+__all__ = ['Session', 'SessionData']
 
 
 class Session:
@@ -31,7 +32,7 @@ class Session:
         self.name = name
         self.path = self._get_path(path, app.__class__.__name__)
         self.paths = [
-            (v.rstrip('/') + '/').encode('latin-1') for v in paths
+            v.rstrip('/').encode('latin-1') + b'/' for v in paths
         ]
         self.expires = min(expires, 31968000)
 
@@ -76,12 +77,13 @@ class Session:
         )
 
     async def _on_request(self, request, response, **_):
+        request.ctx.session = None
+
         if self.paths:
             for path in self.paths:
                 if (request.path + b'/').startswith(path):
                     break
             else:
-                request.ctx.session = None
                 return
 
         response.set_header(b'Cache-Control', b'no-cache, must-revalidate')
@@ -89,8 +91,6 @@ class Session:
 
         if self.name not in request.cookies:
             self._set_cookie(response, self._regenerate_id(request, response))
-
-            request.ctx.session = None
             return
 
         try:
@@ -112,7 +112,7 @@ class Session:
                 fp = open(session_filepath, 'r')
 
                 try:
-                    session = json.loads(fp.read())
+                    session.update(json.loads(fp.read()))
                     fp.close()
                 except ValueError:
                     fp.close()
@@ -125,8 +125,7 @@ class Session:
         request.ctx.session = SessionData(self.name,
                                           session_id,
                                           session,
-                                          session_filepath,
-                                          request)
+                                          session_filepath)
 
         # always renew/update session and cookie expiration time
         self._set_cookie(response, session_id)
@@ -137,14 +136,12 @@ class Session:
 
 
 class SessionData(dict):
-    def __init__(self, name, session_id, session, filepath, request):
+    def __init__(self, name, session_id, session, filepath):
         self.name = name
         self.id = session_id
         self.session = session
         self.filepath = filepath
-        self.request = request
 
-        super().__init__()
         self.update(session)
 
     def save(self):

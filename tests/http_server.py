@@ -38,11 +38,13 @@ async def worker_start(**_):
 async def index(request, response, **_):
     if request.ctx.session is None:
         # there is no session because the client does not send 'sess' cookie
-        return b'\r\n'.join(b'\r\n'.join(v) for v in response.headers.values())
-
-    # set session
-    request.ctx.session['baz'] = 'qux'
-    return b'OK'
+        for values in list(response.headers.values()):
+            for value in values:
+                yield b'\r\n' + value
+    else:
+        # set session
+        request.ctx.session['baz'] = 'qux'
+        yield b'OK'
 
 
 @app.on_response

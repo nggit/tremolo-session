@@ -93,8 +93,7 @@ class TestHTTPServer(unittest.TestCase):
         self.assertEqual(
             header[:header.find(b'\r\n')], b'HTTP/1.1 404 Not Found'
         )
-        # cookies may also be present on the 404 page
-        self.assertTrue(b'\r\nSet-Cookie: sess=' in header)
+        self.assertFalse(b'\r\nSet-Cookie: sess=' in header)
 
     def test_get_badcookie_keyerror(self):
         header, body = getcontents(

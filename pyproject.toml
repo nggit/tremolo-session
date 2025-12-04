@@ -5,12 +5,12 @@ build-backend = 'setuptools.build_meta'
 [project]
 name = 'tremolo-session'
 authors = [
-    { name = 'nggit', email = 'contact@anggit.com' },
+    { name = 'Anggit Arfanto', email = 'contact@anggit.com' },
 ]
 description = 'A simple, file-based session middleware for Tremolo.'
 requires-python = '>=3.6'
 dependencies = [
-    'tremolo>=0.0.777',
+    'tremolo>=0.4.8',
 ]
 license = { text = 'MIT License' }
 classifiers = [
