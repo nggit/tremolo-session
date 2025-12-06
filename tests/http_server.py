@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 
-__all__ = ('app', 'HTTP_HOST', 'HTTP_PORT')
-
-import json  # noqa: E402
-import os  # noqa: E402
-import sys  # noqa: E402
+import json
+import os
+import sys
 
 # makes imports relative from the repo directory
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -16,6 +14,8 @@ HTTP_HOST = '127.0.0.1'
 HTTP_PORT = 28000
 
 app = Application()
+
+__all__ = ['app', 'HTTP_HOST', 'HTTP_PORT']
 
 # session middleware
 sess = Session(app, paths=['/cookies', '/invalid'])
@@ -29,8 +29,8 @@ async def worker_start(**_):
     with open(session_filepath, 'w') as fp:
         json.dump({'foo': 'bar'}, fp)
 
-    # create file /tmp/tremolo-sess/5e55bad
-    with open(session_filepath + 'bad', 'w') as fp:
+    # create file /tmp/tremolo-sess/5e55badf
+    with open(session_filepath + 'badf', 'w') as fp:
         fp.write('{badfile}')
 
 
@@ -63,8 +63,8 @@ async def response_middleware(request, response, **_):
             session.delete()
 
             assert os.path.exists(session.filepath) is False
-        elif '5e55bad.' in request.cookies['sess'][0]:
-            assert os.path.basename(session.filepath) != '5e55bad'
+        elif '5e55badf.' in request.cookies['sess'][0]:
+            assert os.path.basename(session.filepath) != '5e55badf'
 
 
 if __name__ == '__main__':
