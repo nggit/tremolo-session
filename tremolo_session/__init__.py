@@ -9,7 +9,7 @@ import time
 
 from tremolo.exceptions import Forbidden
 
-__version__ = '1.0.12'
+__version__ = '1.0.13'
 __all__ = ['Session', 'SessionData']
 
 
